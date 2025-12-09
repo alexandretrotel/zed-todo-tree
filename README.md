@@ -2,6 +2,8 @@
 
 A Zed editor extension that finds and displays TODO-style comments in your codebase using slash commands in the Assistant.
 
+This extension is maintained as a separate repository at [zed-todo-tree](https://github.com/alexandretrotel/zed-todo-tree) and included as a git submodule in the main [todo-tree](https://github.com/alexandretrotel/todo-tree) repository.
+
 ## Features
 
 ### Slash Commands
@@ -87,13 +89,13 @@ For development or testing:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/alexandretrotel/todo-tree.git
-   cd todo-tree/extensions/zed
+   git clone https://github.com/alexandretrotel/zed-todo-tree.git
+   cd zed-todo-tree
    ```
 
 2. In Zed, open the command palette (`Cmd+Shift+P`)
 3. Run "zed: install dev extension"
-4. Select the `extensions/zed` directory
+4. Select the cloned directory
 
 ## Usage
 
@@ -119,6 +121,39 @@ Use `/todos-stats` to see a statistical breakdown:
 - Average items per file
 - Breakdown by tag with percentages
 - Priority level reference
+
+## Required Capabilities
+
+The Todo Tree Zed extension requires certain capabilities that you may need to accept when first using it. Zed extensions operate under a [capability system](https://zed.dev/docs/extensions/capabilities) for security.
+
+When prompted, you may need to grant the following permissions:
+
+| Capability | Purpose |
+|------------|---------|
+| `process:exec` | Execute `todo-tree` or `tt` CLI for slash commands |
+| `download_file` | Download tree-sitter grammar from GitHub |
+
+You can manage these permissions in your Zed settings under `granted_extension_capabilities`. Add the following to your `settings.json`:
+
+```json
+{
+  "granted_extension_capabilities": [
+    {
+      "kind": "process:exec",
+      "command": "tt",
+      "args": ["**"]
+    },
+    {
+      "kind": "process:exec",
+      "command": "todo-tree",
+      "args": ["**"]
+    },
+    { "kind": "download_file", "host": "github.com", "path": ["**"] }
+  ]
+}
+```
+
+If you restrict these capabilities, the extension may not function properly.
 
 ## How It Works
 
@@ -150,10 +185,15 @@ If installed via Cargo, ensure `~/.cargo/bin` is in your PATH.
 - Verify the tags are in uppercase (case-insensitive matching is enabled by default)
 - Ensure the files aren't being ignored by `.gitignore`
 
+## Acknowledgments
+
+- Tree-sitter grammar for comment parsing from [tree-sitter-comment](https://github.com/stsewd/tree-sitter-comment)
+- Syntax highlighting based on [zed-comment](https://github.com/thedadams/zed-comment) - we re-used the same `highlights.scm` structure with additional tags support. For details about overriding theme colors for syntax highlighting, refer to the `zed-comment` extension.
+
 ## Contributing
 
-Contributions are welcome! Please see the main [todo-tree repository](https://github.com/alexandretrotel/todo-tree) for contribution guidelines.
+Contributions are welcome! Please see the [zed-todo-tree repository](https://github.com/alexandretrotel/zed-todo-tree) for contribution guidelines.
 
 ## License
 
-MIT License - see [LICENSE](../../LICENSE.md) for details.
+MIT License - see [LICENSE](https://github.com/alexandretrotel/todo-tree/blob/main/LICENSE) for details.
