@@ -1,9 +1,0 @@
-/Users/trotelalexandre/Library/Application Support/Zed/extensions/installed/todo-tree/target/wasm32-wasip2/release/deps/futures_executor-a2aeacb2cbb6f3c3.d: /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/lib.rs /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/local_pool.rs /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/enter.rs
-
-/Users/trotelalexandre/Library/Application Support/Zed/extensions/installed/todo-tree/target/wasm32-wasip2/release/deps/libfutures_executor-a2aeacb2cbb6f3c3.rlib: /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/lib.rs /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/local_pool.rs /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/enter.rs
-
-/Users/trotelalexandre/Library/Application Support/Zed/extensions/installed/todo-tree/target/wasm32-wasip2/release/deps/libfutures_executor-a2aeacb2cbb6f3c3.rmeta: /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/lib.rs /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/local_pool.rs /Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/enter.rs
-
-/Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/lib.rs:
-/Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/local_pool.rs:
-/Users/trotelalexandre/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/futures-executor-0.3.31/src/enter.rs:

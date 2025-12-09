@@ -1,2 +1,0 @@
-cargo:rustc-link-lib=static=wit_bindgen_cabi_realloc0_41_0
-cargo:rustc-link-search=native=/Users/trotelalexandre/Library/Application Support/Zed/extensions/installed/todo-tree/target/wasm32-wasip2/release/build/wit-bindgen-rt-28dd87417901b557/out
