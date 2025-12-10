@@ -8,17 +8,21 @@ impl OutputFormatter {
     ///
     /// Returns a markdown-formatted string with:
     /// - Header with summary counts
+    /// - Scanned directory path
     /// - Files grouped with their TODO items
     /// - Summary by tag at the end
-    pub fn format_todos(result: &ScanResult) -> String {
+    pub fn format_todos(result: &ScanResult, root_path: &str) -> String {
         if result.is_empty() {
-            return "No TODO items found in this project.\n".to_string();
+            return format!(
+                "No TODO items found in this project.\n\n> Scanned: `{}`\n",
+                root_path
+            );
         }
 
         let mut output = String::new();
 
         // Header
-        output.push_str(&Self::format_todos_header(result));
+        output.push_str(&Self::format_todos_header(result, root_path));
 
         // Files with their items
         for file in &result.get_files() {
@@ -35,12 +39,14 @@ impl OutputFormatter {
     ///
     /// Returns a markdown-formatted string with:
     /// - Summary table with key metrics
+    /// - Scanned directory path
     /// - Breakdown by tag with percentages
     /// - Priority level reference
-    pub fn format_stats(result: &ScanResult) -> String {
+    pub fn format_stats(result: &ScanResult, root_path: &str) -> String {
         let mut output = String::new();
 
         output.push_str("# TODO Statistics\n\n");
+        output.push_str(&format!("> Scanned: `{}`\n\n", root_path));
         output.push_str(&Self::format_stats_table(result));
         output.push_str(&Self::format_tag_breakdown(result));
         output.push_str(&Self::format_priority_reference());
@@ -69,9 +75,10 @@ impl OutputFormatter {
         format!("TODO Statistics ({} total)", result.summary.total_count)
     }
 
-    fn format_todos_header(result: &ScanResult) -> String {
+    fn format_todos_header(result: &ScanResult, root_path: &str) -> String {
         format!(
-            "# TODO Items\n\nFound {} items in {} files ({} files scanned)\n\n",
+            "# TODO Items\n\n> Scanned: `{}`\n\nFound {} items in {} files ({} files scanned)\n\n",
+            root_path,
             result.summary.total_count,
             result.summary.files_with_todos,
             result.summary.files_scanned
@@ -262,22 +269,30 @@ mod tests {
     #[test]
     fn test_format_todos_empty_result() {
         let result = create_empty_scan_result();
-        let output = OutputFormatter::format_todos(&result);
-        assert_eq!(output, "No TODO items found in this project.\n");
+        let output = OutputFormatter::format_todos(&result, "/test/project");
+        assert!(output.contains("No TODO items found in this project."));
+        assert!(output.contains("> Scanned: `/test/project`"));
     }
 
     #[test]
     fn test_format_todos_contains_header() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_todos(&result);
+        let output = OutputFormatter::format_todos(&result, "/test/project");
         assert!(output.contains("# TODO Items"));
         assert!(output.contains("Found 3 items in 2 files"));
     }
 
     #[test]
+    fn test_format_todos_contains_scanned_path() {
+        let result = create_test_scan_result();
+        let output = OutputFormatter::format_todos(&result, "/my/custom/path");
+        assert!(output.contains("> Scanned: `/my/custom/path`"));
+    }
+
+    #[test]
     fn test_format_todos_contains_file_sections() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_todos(&result);
+        let output = OutputFormatter::format_todos(&result, "/test/project");
         assert!(output.contains("## src/main.rs"));
         assert!(output.contains("## src/lib.rs"));
     }
@@ -285,7 +300,7 @@ mod tests {
     #[test]
     fn test_format_todos_contains_items() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_todos(&result);
+        let output = OutputFormatter::format_todos(&result, "/test/project");
         assert!(output.contains("**[L10]** `TODO`: Implement this"));
         assert!(output.contains("**[L25]** `FIXME(alice)`: Fix this bug"));
     }
@@ -293,7 +308,7 @@ mod tests {
     #[test]
     fn test_format_todos_contains_tag_summary() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_todos(&result);
+        let output = OutputFormatter::format_todos(&result, "/test/project");
         assert!(output.contains("## Summary by Tag"));
         assert!(output.contains("**TODO**: 2"));
         assert!(output.contains("**FIXME**: 1"));
@@ -302,14 +317,21 @@ mod tests {
     #[test]
     fn test_format_stats_contains_header() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_stats(&result);
+        let output = OutputFormatter::format_stats(&result, "/test/project");
         assert!(output.contains("# TODO Statistics"));
+    }
+
+    #[test]
+    fn test_format_stats_contains_scanned_path() {
+        let result = create_test_scan_result();
+        let output = OutputFormatter::format_stats(&result, "/my/custom/path");
+        assert!(output.contains("> Scanned: `/my/custom/path`"));
     }
 
     #[test]
     fn test_format_stats_contains_metrics_table() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_stats(&result);
+        let output = OutputFormatter::format_stats(&result, "/test/project");
         assert!(output.contains("| Total items | 3 |"));
         assert!(output.contains("| Files with TODOs | 2 |"));
         assert!(output.contains("| Files scanned | 10 |"));
@@ -318,21 +340,21 @@ mod tests {
     #[test]
     fn test_format_stats_contains_avg_items() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_stats(&result);
+        let output = OutputFormatter::format_stats(&result, "/test/project");
         assert!(output.contains("| Avg items per file | 1.50 |"));
     }
 
     #[test]
     fn test_format_stats_no_avg_when_empty() {
         let result = create_empty_scan_result();
-        let output = OutputFormatter::format_stats(&result);
+        let output = OutputFormatter::format_stats(&result, "/test/project");
         assert!(!output.contains("Avg items per file"));
     }
 
     #[test]
     fn test_format_stats_contains_tag_breakdown() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_stats(&result);
+        let output = OutputFormatter::format_stats(&result, "/test/project");
         assert!(output.contains("## By Tag"));
         assert!(output.contains("| Tag | Count | Percentage |"));
     }
@@ -340,7 +362,7 @@ mod tests {
     #[test]
     fn test_format_stats_contains_priority_reference() {
         let result = create_test_scan_result();
-        let output = OutputFormatter::format_stats(&result);
+        let output = OutputFormatter::format_stats(&result, "/test/project");
         assert!(output.contains("## By Priority"));
         assert!(output.contains("🔴 Critical"));
         assert!(output.contains("🟡 High"));

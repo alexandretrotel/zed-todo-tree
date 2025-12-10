@@ -50,10 +50,11 @@ impl SlashCommandHandler {
         worktree: Option<&Worktree>,
     ) -> Result<SlashCommandOutput, String> {
         let worktree = worktree.ok_or_else(|| CliError::NoWorktree.to_string())?;
+        let root_path = worktree.root_path();
 
         let result = CliRunner::scan(worktree, &args)?;
 
-        Ok(build_todos_output(&result, &args))
+        Ok(build_todos_output(&result, &args, &root_path))
     }
 
     /// Execute the /todos-stats command.
@@ -61,10 +62,11 @@ impl SlashCommandHandler {
     /// Shows statistics about TODO items in the project.
     fn run_todos_stats(worktree: Option<&Worktree>) -> Result<SlashCommandOutput, String> {
         let worktree = worktree.ok_or_else(|| CliError::NoWorktree.to_string())?;
+        let root_path = worktree.root_path();
 
         let result = CliRunner::scan(worktree, &[])?;
 
-        Ok(build_stats_output(&result))
+        Ok(build_stats_output(&result, &root_path))
     }
 
     /// Get tag completions for the /todos command.
@@ -76,8 +78,12 @@ impl SlashCommandHandler {
 }
 
 /// Build the output for the /todos command.
-pub fn build_todos_output(result: &ScanResult, filter_tags: &[String]) -> SlashCommandOutput {
-    let text = OutputFormatter::format_todos(result);
+pub fn build_todos_output(
+    result: &ScanResult,
+    filter_tags: &[String],
+    root_path: &str,
+) -> SlashCommandOutput {
+    let text = OutputFormatter::format_todos(result, root_path);
     let label = OutputFormatter::todos_label(result, filter_tags);
 
     SlashCommandOutput {
@@ -90,8 +96,8 @@ pub fn build_todos_output(result: &ScanResult, filter_tags: &[String]) -> SlashC
 }
 
 /// Build the output for the /todos-stats command.
-pub fn build_stats_output(result: &ScanResult) -> SlashCommandOutput {
-    let text = OutputFormatter::format_stats(result);
+pub fn build_stats_output(result: &ScanResult, root_path: &str) -> SlashCommandOutput {
+    let text = OutputFormatter::format_stats(result, root_path);
     let label = OutputFormatter::stats_label(result);
 
     SlashCommandOutput {
@@ -263,9 +269,10 @@ mod tests {
     #[test]
     fn test_build_todos_output_empty_result() {
         let result = create_empty_scan_result();
-        let output = build_todos_output(&result, &[]);
+        let output = build_todos_output(&result, &[], "/test/project");
 
         assert!(output.text.contains("No TODO items found"));
+        assert!(output.text.contains("> Scanned: `/test/project`"));
         assert_eq!(output.sections.len(), 1);
         assert!(output.sections[0].label.contains("0 items"));
     }
@@ -273,9 +280,10 @@ mod tests {
     #[test]
     fn test_build_todos_output_with_items() {
         let result = create_populated_scan_result();
-        let output = build_todos_output(&result, &[]);
+        let output = build_todos_output(&result, &[], "/test/project");
 
         assert!(output.text.contains("# TODO Items"));
+        assert!(output.text.contains("> Scanned: `/test/project`"));
         assert!(output.text.contains("src/main.rs"));
         assert!(output.text.contains("Implement this"));
         assert_eq!(output.sections.len(), 1);
@@ -284,7 +292,7 @@ mod tests {
     #[test]
     fn test_build_todos_output_label_no_filter() {
         let result = create_populated_scan_result();
-        let output = build_todos_output(&result, &[]);
+        let output = build_todos_output(&result, &[], "/test/project");
 
         assert!(output.sections[0].label.contains("3 items"));
         assert!(output.sections[0].label.contains("2 files"));
@@ -293,7 +301,11 @@ mod tests {
     #[test]
     fn test_build_todos_output_label_with_filter() {
         let result = create_populated_scan_result();
-        let output = build_todos_output(&result, &["BUG".to_string(), "FIXME".to_string()]);
+        let output = build_todos_output(
+            &result,
+            &["BUG".to_string(), "FIXME".to_string()],
+            "/test/project",
+        );
 
         assert!(output.sections[0].label.contains("BUG"));
         assert!(output.sections[0].label.contains("FIXME"));
@@ -302,7 +314,7 @@ mod tests {
     #[test]
     fn test_build_todos_output_section_range_covers_text() {
         let result = create_populated_scan_result();
-        let output = build_todos_output(&result, &[]);
+        let output = build_todos_output(&result, &[], "/test/project");
 
         let range_end = output.sections[0].range.end as usize;
         assert_eq!(range_end, output.text.len());
@@ -311,7 +323,7 @@ mod tests {
     #[test]
     fn test_build_todos_output_with_single_filter() {
         let result = create_populated_scan_result();
-        let output = build_todos_output(&result, &["TODO".to_string()]);
+        let output = build_todos_output(&result, &["TODO".to_string()], "/test/project");
 
         assert!(output.sections[0].label.contains("TODO"));
     }
@@ -319,9 +331,10 @@ mod tests {
     #[test]
     fn test_build_stats_output_empty_result() {
         let result = create_empty_scan_result();
-        let output = build_stats_output(&result);
+        let output = build_stats_output(&result, "/test/project");
 
         assert!(output.text.contains("# TODO Statistics"));
+        assert!(output.text.contains("> Scanned: `/test/project`"));
         assert!(output.text.contains("Total items | 0"));
         assert_eq!(output.sections.len(), 1);
     }
@@ -329,9 +342,10 @@ mod tests {
     #[test]
     fn test_build_stats_output_with_items() {
         let result = create_populated_scan_result();
-        let output = build_stats_output(&result);
+        let output = build_stats_output(&result, "/test/project");
 
         assert!(output.text.contains("# TODO Statistics"));
+        assert!(output.text.contains("> Scanned: `/test/project`"));
         assert!(output.text.contains("Total items | 3"));
         assert!(output.text.contains("Files with TODOs | 2"));
     }
@@ -339,7 +353,7 @@ mod tests {
     #[test]
     fn test_build_stats_output_label() {
         let result = create_populated_scan_result();
-        let output = build_stats_output(&result);
+        let output = build_stats_output(&result, "/test/project");
 
         assert!(output.sections[0].label.contains("3 total"));
     }
@@ -347,7 +361,7 @@ mod tests {
     #[test]
     fn test_build_stats_output_section_range_covers_text() {
         let result = create_populated_scan_result();
-        let output = build_stats_output(&result);
+        let output = build_stats_output(&result, "/test/project");
 
         let range_end = output.sections[0].range.end as usize;
         assert_eq!(range_end, output.text.len());
@@ -356,7 +370,7 @@ mod tests {
     #[test]
     fn test_build_stats_output_contains_priority_info() {
         let result = create_populated_scan_result();
-        let output = build_stats_output(&result);
+        let output = build_stats_output(&result, "/test/project");
 
         assert!(output.text.contains("By Priority"));
         assert!(output.text.contains("Critical"));

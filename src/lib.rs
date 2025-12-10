@@ -240,7 +240,7 @@ mod tests {
             },
         );
 
-        let formatted = OutputFormatter::format_todos(&result);
+        let formatted = OutputFormatter::format_todos(&result, "/test/project");
         assert!(formatted.contains("test.rs"));
         assert!(formatted.contains("Test integration"));
     }
@@ -276,7 +276,7 @@ mod tests {
         }"#;
 
         let result = parse_output(json).unwrap();
-        let formatted = OutputFormatter::format_todos(&result);
+        let formatted = OutputFormatter::format_todos(&result, "/test/project");
 
         assert!(formatted.contains("src/main.rs"));
         assert!(formatted.contains("Implement feature"));
@@ -338,12 +338,12 @@ mod tests {
             },
         );
 
-        let todos_output = build_todos_output(&result, &["BUG".to_string()]);
+        let todos_output = build_todos_output(&result, &["BUG".to_string()], "/test/project");
         assert!(todos_output.text.contains("Critical bug"));
         assert!(todos_output.text.contains("(developer)"));
         assert!(todos_output.sections[0].label.contains("BUG"));
 
-        let stats_output = build_stats_output(&result);
+        let stats_output = build_stats_output(&result, "/test/project");
         assert!(stats_output.text.contains("3"));
     }
 
@@ -376,7 +376,7 @@ mod tests {
         }"#;
 
         let result = parse_output(json).unwrap();
-        let output = build_todos_output(&result, &[]);
+        let output = build_todos_output(&result, &[], "/test/project");
 
         assert!(output.text.contains("No TODO items found"));
         assert!(output.sections[0].label.contains("0 items"));
@@ -418,11 +418,11 @@ mod tests {
             },
         );
 
-        let output = build_todos_output(&result, &[]);
+        let output = build_todos_output(&result, &[], "/test/project");
         assert!(output.text.contains("50 items"));
         assert!(output.text.contains("10 files"));
 
-        let stats = build_stats_output(&result);
+        let stats = build_stats_output(&result, "/test/project");
         assert!(stats.text.contains("50"));
         assert!(stats.text.contains("5.00")); // avg items per file
     }
@@ -551,7 +551,7 @@ mod tests {
         ];
 
         for (result, filter) in test_cases {
-            let output = build_todos_output(&result, &filter);
+            let output = build_todos_output(&result, &filter, "/test/project");
             let range_end = output.sections[0].range.end as usize;
             assert_eq!(
                 range_end,
@@ -559,7 +559,7 @@ mod tests {
                 "Section range doesn't cover full text"
             );
 
-            let stats = build_stats_output(&result);
+            let stats = build_stats_output(&result, "/test/project");
             let stats_range_end = stats.sections[0].range.end as usize;
             assert_eq!(
                 stats_range_end,
