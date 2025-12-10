@@ -84,25 +84,27 @@ pub fn process_command_output(
 pub struct CliRunner;
 
 impl CliRunner {
-    /// Find the path to the todo-tree CLI binary.
+    /// Find the binary name for the todo-tree CLI.
     ///
-    /// Searches for either `tt` or `todo-tree` in the system PATH.
-    fn find_cli_path(worktree: &Worktree) -> Result<String, CliError> {
-        if let Some(path) = worktree.which("tt") {
-            return Ok(path);
+    /// Checks if either `tt` or `todo-tree` is available in the system PATH.
+    /// Returns the binary name (not the absolute path) to allow Zed to properly
+    /// handle command capabilities.
+    fn find_cli_binary(worktree: &Worktree) -> Result<&'static str, CliError> {
+        if worktree.which("tt").is_some() {
+            return Ok("tt");
         }
-        if let Some(path) = worktree.which("todo-tree") {
-            return Ok(path);
+        if worktree.which("todo-tree").is_some() {
+            return Ok("todo-tree");
         }
         Err(CliError::NotFound)
     }
 
     /// Run a scan command and return the parsed results.
     pub fn scan(worktree: &Worktree, filter_tags: &[String]) -> Result<ScanResult, CliError> {
-        let cli_path = Self::find_cli_path(worktree)?;
+        let cli_binary = Self::find_cli_binary(worktree)?;
         let root_path = worktree.root_path();
 
-        let (cmd_path, args) = build_scan_args(&cli_path, &root_path, filter_tags);
+        let (cmd_path, args) = build_scan_args(cli_binary, &root_path, filter_tags);
 
         let mut cmd = zed::process::Command::new(&cmd_path);
         for arg in &args {
