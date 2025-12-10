@@ -1,6 +1,6 @@
 [package]
 name = "zed-todo-tree"
-version = "0.1.0"
+version = "0.2.0"
 edition.workspace = true
 authors.workspace = true
 license-file.workspace = true
@@ -13,7 +13,7 @@ keywords = ["zed", "extension", "todo", "todo-tree", "productivity"]
 crate-type = ["cdylib"]
 
 [dependencies]
-todo-tree-core = { path = "../../core" }
+todo-tree-core = { path = "../../core", version = "0.2.0" }
 zed_extension_api = "0.7.0"
 serde = { version = "1", features = ["derive"] }
 
