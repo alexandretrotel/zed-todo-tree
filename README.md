@@ -4,6 +4,8 @@ A Zed editor extension that finds and displays TODO-style comments in your codeb
 
 This extension is maintained as a separate repository at [zed-todo-tree](https://github.com/alexandretrotel/zed-todo-tree) and included as a git submodule in the main [todo-tree](https://github.com/alexandretrotel/todo-tree) repository.
 
+Check the original repository for more information.
+
 ## Features
 
 ### Slash Commands
@@ -16,43 +18,15 @@ Use these commands in the Zed Assistant to interact with TODOs in your project:
 | `/todos [TAG]` | Filter by specific tag (e.g., `/todos BUG`) |
 | `/todos-stats` | Show statistics about TODO items |
 
-### Supported Tags
+### Syntax Highlighting
 
-The extension recognizes the following TODO-style tags:
+The extension provides syntax highlighting for TODO-style comments directly in your code editor. Tags like `TODO`, `FIXME`, `BUG`, `HACK`, `NOTE`, and others are highlighted with distinct colors, making them easy to spot while browsing your code.
 
-| Priority | Tags |
-|----------|------|
-| 🔴 Critical | `BUG`, `FIXME`, `XXX` |
-| 🟡 High | `HACK`, `WARN`, `WARNING` |
-| 🔵 Medium | `TODO`, `PERF` |
-| 🟢 Low | `NOTE`, `INFO`, `IDEA` |
+This feature uses Tree-sitter for parsing and is based on the [zed-comment](https://github.com/thedadams/zed-comment) extension's highlighting structure, with additional support for TODO-specific tags.
 
-### Example Output
+#### Customizing Colors
 
-When you use `/todos` in the Assistant, you'll get a formatted list like:
-
-```
-# TODO Items
-
-Found 6 items in 3 files (15 files scanned)
-
-## src/main.rs
-
-- **[L10]** `TODO`: Implement error handling
-- **[L25]** `FIXME(alice)`: This needs refactoring
-
-## src/lib.rs
-
-- **[L5]** `NOTE`: Public API
-- **[L42]** `BUG`: Memory leak in this function
-
-## Summary by Tag
-
-- **TODO**: 2
-- **FIXME**: 1
-- **NOTE**: 1
-- **BUG**: 1
-```
+You can override the default highlight colors in your Zed theme. Refer to the [zed-comment](https://github.com/thedadams/zed-comment) extension documentation for details on customizing theme colors for syntax highlighting.
 
 ## Prerequisites
 
@@ -131,7 +105,6 @@ When prompted, you may need to grant the following permissions:
 | Capability | Purpose |
 |------------|---------|
 | `process:exec` | Execute `todo-tree` or `tt` CLI for slash commands |
-| `download_file` | Download tree-sitter grammar from GitHub |
 
 You can manage these permissions in your Zed settings under `granted_extension_capabilities`. Add the following to your `settings.json`:
 
@@ -148,7 +121,6 @@ You can manage these permissions in your Zed settings under `granted_extension_c
       "command": "todo-tree",
       "args": ["**"]
     },
-    { "kind": "download_file", "host": "github.com", "path": ["**"] }
   ]
 }
 ```
