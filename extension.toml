@@ -1,6 +1,6 @@
 id = "todo-tree"
 name = "Todo Tree"
-version = "0.1.0"
+version = "0.2.0"
 schema_version = 1
 authors = ["Alexandre Trotel"]
 description = "Find and display TODO-style comments in your codebase using slash commands in the Assistant."
